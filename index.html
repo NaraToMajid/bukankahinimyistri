@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUKANKAHINIMY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div>
+                <div class="logo" id="logo" oncontextmenu="openAdminLogin(event)">BUKANKAHINIMY</div>
+                <div class="logo-year">© 2025</div>
+            </div>
+            <button class="upload-btn" id="openUploadModal">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Foto
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container">
+        <section class="gallery-section">
+            <div id="galleryContainer" class="gallery-grid">
+                <!-- Foto akan dimuat di sini -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Memuat galeri...
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Foto Baru</h3>
+                <button class="close-btn" id="closeUploadModal">&times;</button>
+            </div>
+            
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label class="form-label" for="photoTitle">Judul Foto</label>
+                    <input type="text" id="photoTitle" class="form-input" placeholder="Masukkan judul foto" required maxlength="50">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="authorName">Nama Anda</label>
+                    <input type="text" id="authorName" class="form-input" placeholder="Masukkan nama Anda" required maxlength="30">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="photoDescription">Deskripsi Foto</label>
+                    <textarea id="photoDescription" class="form-textarea" placeholder="Masukkan deskripsi foto (opsional)" maxlength="200"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="file-upload-area">
+                        <label class="form-label">Pilih File Foto</label>
+                        <div class="file-input-container">
+                            <label for="photoFile" class="file-input-label">
+                                <i class="fas fa-file-image"></i>
+                                <span id="fileLabelText">Klik untuk memilih foto</span>
+                            </label>
+                            <input type="file" id="photoFile" class="file-input" accept=".jpg,.jpeg,.png,.gif" required>
+                            <p class="file-info">Format: JPG, PNG, JPEG. Maksimal 5MB</p>
+                            <div id="fileError" class="file-error"></div>
+                        </div>
+                        
+                        <div class="file-preview-container">
+                            <img id="filePreview" class="file-preview" alt="Preview foto">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-upload"></i> Upload Foto
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Comments Modal -->
+    <div class="comments-modal" id="commentsModal">
+        <div class="comments-modal-content">
+            <div class="comments-modal-header">
+                <h3 class="comments-modal-title">Komentar Foto</h3>
+                <button class="close-comments-btn" id="closeCommentsModal">&times;</button>
+            </div>
+            
+            <div class="comments-modal-body" id="commentsModalBody">
+                <!-- Konten komentar akan dimuat di sini -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Modal -->
+    <div class="report-modal" id="reportModal">
+        <div class="report-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Laporkan Foto</h3>
+                <button class="close-btn" id="closeReportModal">&times;</button>
+            </div>
+            
+            <p style="margin-bottom: 20px; color: #CCC;">Silakan pilih alasan pelaporan:</p>
+            
+            <div class="report-options" id="reportOptions">
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="Konten tidak pantas">
+                    <span>Konten tidak pantas</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="Hak cipta / plagiarisme">
+                    <span>Hak cipta / plagiarisme</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="Spam atau penipuan">
+                    <span>Spam atau penipuan</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="Kekerasan atau bahaya">
+                    <span>Kekerasan atau bahaya</span>
+                </label>
+                <label class="report-option">
+                    <input type="radio" name="reportReason" value="Lainnya">
+                    <span>Lainnya</span>
+                </label>
+            </div>
+            
+            <div id="customReasonContainer" style="display: none; margin-top: 15px;">
+                <textarea id="customReason" class="form-textarea" placeholder="Jelaskan alasan pelaporan Anda..." maxlength="200"></textarea>
+            </div>
+            
+            <button class="submit-btn" id="submitReportBtn" style="margin-top: 20px;">
+                <i class="fas fa-flag"></i> Kirim Laporan
+            </button>
+        </div>
+    </div>
+    
+    <!-- Admin Login Modal -->
+    <div class="admin-login-modal" id="adminLoginModal">
+        <div class="admin-login-content">
+            <h3 class="admin-login-title"><i class="fas fa-lock"></i> Akses Admin</h3>
+            <p style="color: #CCC; margin-bottom: 20px;">Masukkan password untuk mengakses panel admin</p>
+            
+            <input type="password" id="adminPassword" class="admin-login-input" placeholder="Masukkan password">
+            <div id="adminLoginError" style="color: #F44336; margin-bottom: 15px; display: none;">Password salah!</div>
+            
+            <button class="admin-login-btn" id="adminLoginBtn">
+                <i class="fas fa-sign-in-alt"></i> Masuk
+            </button>
+            
+            <p style="color: #888; font-size: 0.8rem; margin-top: 20px;">Klik kanan pada judul "BUKANKAHINIMY" untuk membuka panel ini</p>
+        </div>
+    </div>
+    
+    <!-- Admin Panel Modal -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-modal-content">
+            <div class="admin-header">
+                <h3 class="admin-title"><i class="fas fa-user-shield"></i> Panel Admin BUKANKAHINIMY</h3>
+                <button class="close-admin-btn" id="closeAdminModal">&times;</button>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="reports">Laporan Foto</button>
+                <button class="admin-tab" data-tab="photos">Kelola Foto</button>
+                <button class="admin-tab" data-tab="stats">Statistik</button>
+            </div>
+            
+            <!-- Reports Section -->
+            <div class="admin-section active" id="reportsSection">
+                <h4 style="margin-bottom: 15px; color: var(--report-color);"><i class="fas fa-flag"></i> Daftar Laporan</h4>
+                <div class="reports-list" id="reportsList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat laporan...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Photos Section -->
+            <div class="admin-section" id="photosSection">
+                <h4 style="margin-bottom: 15px; color: var(--admin-color);"><i class="fas fa-images"></i> Semua Foto</h4>
+                <div class="photos-list" id="adminPhotosList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat foto...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Section -->
+            <div class="admin-section" id="statsSection">
+                <h4 style="margin-bottom: 15px; color: var(--admin-color);"><i class="fas fa-chart-bar"></i> Statistik</h4>
+                <div id="adminStats">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat statistik...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="footer-text">BUKANKAHINIMY © 2025</p>
+            <p class="footer-text">Dibuat dengan <i class="fas fa-heart" style="color: #F44336;"></i> menggunakan Supabase</p>
+            <p class="footer-creator">Dibuat oleh ORADEV</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
